@@ -18,12 +18,12 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 
 # Add LZFSE compression library
-set(LZFSE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/unix/lzfse-lzfse-1.0)
+set(LZFSE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/unix/lzfse-lzfse-1.0)
 add_subdirectory(${LZFSE_DIR})
 include_directories(${LZFSE_DIR}/src/lzfse)
 
 # Add libusbmuxd for iOS USB communication
-set(libusbmuxd_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/unix/libusbmuxd)
+set(libusbmuxd_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/unix/libusbmuxd)
 add_subdirectory(${libusbmuxd_DIR})
 include_directories(${libusbmuxd_DIR}/include)
 
@@ -32,10 +32,9 @@ include_directories(include)
 
 # Create Record3D library
 add_library(record3d_lib STATIC 
-  src/Record3DStream.cpp 
-  src/JPEGDecoder.cpp
+  src/Record3DStream.cpp
 )
-target_link_libraries(record3d_lib PUBLIC lzfse usbmuxd)
+target_link_libraries(record3d_lib PUBLIC lzfse usbmuxd ${OpenCV_LIBS})
 
 # Create ROS node executable
 add_executable(record3d_node src/record3d_node.cpp)

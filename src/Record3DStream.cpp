@@ -1,5 +1,5 @@
 #include "../include/record3d/Record3DStream.h"
-#include "JPEGDecoder.h"
+#include <opencv2/opencv.hpp>
 #include <lzfse.h>
 #include <usbmuxd.h>
 #include <cstring>
@@ -162,17 +162,29 @@ namespace Record3D
             memcpy( (void*) &cameraPose_, rawMessageBuffer.data() + offset, currSize );
             offset += currSize;
 
-            // 3.3 Read and decode the RGB frame
+            // 3.3 Read and decode the RGB frame using OpenCV
             currSize = record3DHeader.rgbSize;
-            int loadedWidth, loadedHeight, loadedChannels;
-            uint8_t* rgbPixels = stbi_load_from_memory( rawMessageBuffer.data() + offset, currSize, &loadedWidth, &loadedHeight, &loadedChannels, STBI_rgb );
-            size_t decompressedRGBDataSize = loadedWidth * loadedHeight * loadedChannels * sizeof(uint8_t);
+            
+            // Create a cv::Mat from the JPEG buffer
+            std::vector<uint8_t> jpeg_buffer(rawMessageBuffer.data() + offset, 
+                                             rawMessageBuffer.data() + offset + currSize);
+            cv::Mat rgb_img = cv::imdecode(jpeg_buffer, cv::IMREAD_COLOR);
+            
+            if (rgb_img.empty()) {
+                // Decoding failed, skip this frame
+                break;
+            }
+            
+            // Convert BGR to RGB (OpenCV uses BGR by default)
+            cv::cvtColor(rgb_img, rgb_img, cv::COLOR_BGR2RGB);
+            
+            // Copy to buffer
+            size_t decompressedRGBDataSize = rgb_img.total() * rgb_img.elemSize();
             if ( RGBImageBuffer_.size() != decompressedRGBDataSize )
             {
                 RGBImageBuffer_.resize(decompressedRGBDataSize);
             }
-            memcpy( RGBImageBuffer_.data(), rgbPixels, decompressedRGBDataSize);
-            stbi_image_free( rgbPixels );
+            memcpy( RGBImageBuffer_.data(), rgb_img.data, decompressedRGBDataSize);
             offset += currSize;
 
             // 3.4 Read and decompress the depth frame

@@ -177,12 +177,12 @@ private:
 
         // Only publish compressed images (better performance)
         rgb_compressed_pub_ = this->create_publisher<sensor_msgs::msg::CompressedImage>(
-            topic_prefix_ + "rgb/image_raw/compressed", qos);
+            topic_prefix_ + "rgb/img", qos);
         
         depth_pub_ = this->create_publisher<sensor_msgs::msg::Image>(
-            topic_prefix_ + "depth/image_raw", qos);
+            topic_prefix_ + "depth/img", qos);
         confidence_pub_ = this->create_publisher<sensor_msgs::msg::Image>(
-            topic_prefix_ + "confidence/image_raw", qos);
+            topic_prefix_ + "confidence/img", qos);
         rgb_info_pub_ = this->create_publisher<sensor_msgs::msg::CameraInfo>(
             topic_prefix_ + "rgb/camera_info", qos);
         depth_info_pub_ = this->create_publisher<sensor_msgs::msg::CameraInfo>(
